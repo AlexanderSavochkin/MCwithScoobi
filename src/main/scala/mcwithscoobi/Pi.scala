@@ -2,7 +2,10 @@ package mcwithscoobi
 
 import scala.util.Random
 import com.nicta.scoobi.Scoobi._
-import com.nicta.scoobi.io.func.FunctionInput
+//import com.nicta.scoobi.io.func.FunctionInput
+import com.nicta.scoobi.core.Reduction
+import com.nicta.scoobi.impl.plan.source.FunctionInput
+
 
 import MCUtils._
 
@@ -13,7 +16,7 @@ object PiMonteCarlo extends ScoobiApp {
 
   def run() = {
     val input = FunctionInput.fromFunction(numSequencies)( x=>x )
-    val pi = input.flatMap( generateRands _ ).map( checkIfInside ).groupByKey.combine( (x:ValueEstimator, y:ValueEstimator) => x combineEstimations y )
+    val pi = input.mapFlatten( generateRands _ ).map( checkIfInside ).groupByKey.combine( Reduction( (x:ValueEstimator, y:ValueEstimator) => x combineEstimations y ) )
     persist( toTextFile(pi, "output", overwrite=true))
   }
 
